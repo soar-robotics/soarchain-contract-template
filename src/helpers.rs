@@ -1,27 +1,58 @@
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
+#[cfg(test)]
+pub mod test {
+    use std::marker::PhantomData;
+    use crate::execute;
+    use crate::error::ContractError;
+    use std::fmt::Debug;
+    use cosmwasm_std::testing::{
+        MockApi, MockQuerier, MockStorage,
+    };
+    use cosmwasm_std::OwnedDeps;
+    use schemars::JsonSchema;
+    use serde::Deserialize;
+    use serde::Serialize;
 
-use cosmwasm_std::{to_json_binary, Addr, CosmosMsg, StdResult, WasmMsg};
 
-use crate::msg::ExecuteMsg;
-
-/// CwTemplateContract is a wrapper around Addr that provides a lot of helpers
-/// for working with this.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-pub struct CwTemplateContract(pub Addr);
-
-impl CwTemplateContract {
-    pub fn addr(&self) -> Addr {
-        self.0.clone()
-    }
-
-    pub fn call<T: Into<ExecuteMsg>>(&self, msg: T) -> StdResult<CosmosMsg> {
-        let msg = to_json_binary(&msg.into())?;
-        Ok(WasmMsg::Execute {
-            contract_addr: self.addr().into(),
-            msg,
-            funds: vec![],
+    pub fn our_mock_dependencies() -> OwnedDeps<MockStorage, MockApi, MockQuerier> {
+        OwnedDeps {
+            storage: MockStorage::default(),
+            api: MockApi::default(),
+            querier: MockQuerier::default(),
+            custom_query_type: PhantomData,
         }
-        .into())
     }
+
+
+    pub fn setup() -> Result<OwnedDeps<MockStorage, MockApi, MockQuerier>, ContractError> {
+
+        let deps = our_mock_dependencies();
+        let operations = vec![
+            execute::ConnectionInput {
+                operation: execute::FullOperation::Set,
+                source_chain: "soarchain".to_string(),
+            },
+
+        ];
+        execute::connection_operations(operations)?;
+
+        Ok(deps)
+    }
+
+    #[derive(Serialize, Deserialize, Clone, Eq, PartialEq, JsonSchema, Debug)]
+    pub struct Client {
+        pub address: String,
+        pub index: String,
+        pub score: String,
+    }
+
+    impl Client {
+        pub fn new(address: String, index: String, score: String) -> Self {
+            Client {
+                address: address.to_string(),
+                index: index.to_string(),
+                score: score.to_string(),
+            }
+        }
+    }
+
 }
