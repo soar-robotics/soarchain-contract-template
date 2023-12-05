@@ -1,8 +1,16 @@
 [package]
-name = "data-quality-assurance-template"
-version = "0.1.0"
-authors = ["golnar-m <golnar@soarrobotics.com>"]
-edition = "2021"
+name = "assurance"
+version = "0.7.0"
+authors = ["Roman <roman@osmosis.team>"]
+edition = "2018"
+
+exclude = [
+  # Those files are rust-optimizer artifacts. You might want to commit them for convenience but they should not be part of the source code publication.
+  "contract.wasm",
+  "hash.txt",
+]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -26,23 +34,25 @@ library = []
 
 [package.metadata.scripts]
 optimize = """docker run --rm -v "$(pwd)":/code \
-  --mount type=volume,source="$(basename "$(pwd)")_cache",target=/target \
+  --mount type=volume,source="$(basename "$(pwd)")_cache",target=/code/target \
   --mount type=volume,source=registry_cache,target=/usr/local/cargo/registry \
-  cosmwasm/optimizer:0.15.0
+  cosmwasm/rust-optimizer:0.15.0
 """
 
 [dependencies]
-cosmwasm-schema = "1.5.0"
-cosmwasm-std = { version = "1.5.0", features = [
-    "cosmwasm_1_3",
-    # Enable this if you only deploy to chains that have CosmWasm 1.4 or higher
-    # "cosmwasm_1_4",
-] }
-cw-storage-plus = "1.1.0"
-cw2 = "1.1.1"
-schemars = "0.8.15"
-serde = { version = "1.0.189", default-features = false, features = ["derive"] }
-thiserror = { version = "1.0.49" }
+cosmwasm-schema = { version = "1.1.0" }
+cosmwasm-std = "1.1"
+cosmwasm-storage = "1.1"
+cw-storage-plus = "0.15"
+cw2 = "0.15"
+schemars = "0.8"
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+thiserror = "1.0"
+log = { version = "0.4", features = ["max_level_debug", "release_max_level_warn"] }
+anyhow = "1"
+itertools = "0.10"
+
+
+
 
 [dev-dependencies]
-cw-multi-test = "0.17.0"
