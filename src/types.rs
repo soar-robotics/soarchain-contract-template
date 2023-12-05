@@ -1,14 +1,18 @@
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+use cosmwasm_schema::cw_serde;
+
+#[cw_serde]
 pub struct Data {
-    pub dataInfo: DataInfo,
+    pub data_info: DataInfo,
     pub sign: String,
     pub pubkey: String
 }
 
+#[cw_serde]
 pub struct DataInfo {
-    pub data: DataDetails
+    pub data_details: DataDetails
 }
 
+#[cw_serde]
 pub struct DataDetails {
     pub accelerometer: GeographicInfo, 
     pub gyroscope: GeographicInfo,
@@ -19,31 +23,32 @@ pub struct DataDetails {
     pub vehicle_info: VehicleInfo
 }
 
+#[cw_serde]
 pub struct GeographicInfo {
-    x: u64,
-    y: u64,
-    z: u64
+    pub x: u64,
+    pub y: u64,
+    pub z: u64
 }
 
+#[cw_serde]
 pub struct LocationInfo {
-    lat: u64,
-    lng: u64
+    pub lat: u64,
+    pub lng: u64
 }
 
+#[cw_serde]
 pub struct VehicleInfo {
-    load_pct: u64,
-    temp: u64,
-    rpm: u64,
-    vss: u64,
-    iat:u64,
-    maf: u64, 
-    throttlepo: u64,
-    runtm: u64, 
-    fli: u64,
-    baro: u64,
-    load_abs: u64,
-    fuel_rate: u64,
-    odometer: u64
+    pub load_pct: u64,
+    pub temp: u64,
+    pub rpm: u64,
+    pub vss: u64,
+    pub iat:u64,
+    pub maf: u64, 
+    pub throttlepo: u64,
+    pub runtm: u64, 
+    pub fli: u64,
+    pub baro: u64,
+    pub load_abs: u64,
+    pub fuel_rate: u64,
+    pub odometer: u64
 }
-
-
