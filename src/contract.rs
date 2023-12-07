@@ -40,6 +40,11 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg { QueryMsg::DataQualificationAssurance { data, } => to_json_binary(&data_qualification(deps, data)), }
 }
 
+/** This query is a template for checking data structure validity
+ *  We are checking some of them
+ *  You can modify this query with your needs
+ */
+
 fn data_qualification (_deps: Deps, data: Data) -> DataQualificationResponse {
 
     let result: bool;
