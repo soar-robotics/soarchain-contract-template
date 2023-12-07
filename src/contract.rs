@@ -6,7 +6,7 @@ use cosmwasm_std::{
 use cw2::set_contract_version;
 use crate::error::ContractError;
 use crate::types::Data;
-use crate::msg::{ClientByIndexResponse, InstantiateMsg, QueryMsg};
+use crate::msg::{DataQualificationResponse, InstantiateMsg, QueryMsg};
 use crate::state::{State, STATE};
 use cosmwasm_std::{
     to_json_binary, Binary, StdResult
@@ -37,10 +37,10 @@ pub fn instantiate(
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
 
-    match msg { QueryMsg::GetClientByIndex { data, } => to_json_binary(&get_client_by_index(deps, data)), }
+    match msg { QueryMsg::DataQualificationAssurance { data, } => to_json_binary(&data_qualification(deps, data)), }
 }
 
-fn get_client_by_index(_deps: Deps, data: Data) -> ClientByIndexResponse {
+fn data_qualification (_deps: Deps, data: Data) -> DataQualificationResponse {
 
     let result: bool;
 
@@ -50,36 +50,7 @@ fn get_client_by_index(_deps: Deps, data: Data) -> ClientByIndexResponse {
         result = true
     }
 
-    ClientByIndexResponse {
+    DataQualificationResponse {
         qualified: result,
     }
 }
-
-
-
-
-
-
-#[cfg(test)]
-mod tests {
-
-    use crate::helpers::test::Client;
-
-
-    use std::println as info;
-
-    #[test]
-    fn query_client() {
-
-
-        let client = Client::new("soaraddress".to_string(), "43".to_string(), "50".to_string());
-
-        info!("contract-poa-get_client_by_index: index {} :", client.index);
-        assert_eq!(client.score, "50");
-
-
-    }
-
-
-}
-
