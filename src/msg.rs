@@ -11,13 +11,13 @@ pub struct InstantiateMsg {
 #[derive(QueryResponses)]
 pub enum QueryMsg {
 
-    #[returns(ClientByIndexResponse)]
-    GetClientByIndex { data: Data },
+    #[returns(DataQualificationResponse)]
+    DataQualificationAssurance { data: Data },
     
 }
 
 // We define a custom struct for each query response
 #[cw_serde]
-pub struct ClientByIndexResponse {
+pub struct DataQualificationResponse {
     pub qualified: bool,
 }
