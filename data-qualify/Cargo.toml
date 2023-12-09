@@ -1,7 +1,7 @@
 [package]
 name = "assurance"
 version = "0.7.0"
-authors = ["Roman <roman@osmosis.team>"]
+authors = ["Golnar <golnar@soarrobotics.com>"]
 edition = "2018"
 
 exclude = [
@@ -51,7 +51,7 @@ thiserror = "1.0"
 log = { version = "0.4", features = ["max_level_debug", "release_max_level_warn"] }
 anyhow = "1"
 itertools = "0.10"
-
+serde_json = "1.0"
 
 
 
