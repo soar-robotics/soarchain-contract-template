@@ -1,19 +1,17 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
-use crate::types::Data;
+// use crate::types::Data;
 
 #[cw_serde]
 pub struct InstantiateMsg {
     // You can initialize any state or perform setup logic here
-    pub data: Data,
+    pub data: String,
 }
 
 // Define your custom struct for messages
 #[cw_serde]
-pub enum ExecuteMsg {
-    AnonymizeData { 
+pub struct ExecuteMsg {
         /* define parameters */    
-        data: Data 
-    },
+    pub data: String,
 }
 
 #[cw_serde]
@@ -31,5 +29,5 @@ pub enum QueryMsg {
 #[cw_serde]
 pub struct DataAnonymizationResponse {
     /* define parameters */
-    pub qualified: bool,
+    pub anonymized: bool,
 }

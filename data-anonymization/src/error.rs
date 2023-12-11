@@ -11,8 +11,8 @@ pub enum ContractError {
     #[error("Unauthorized")]
     Unauthorized {},
 
-    #[error("Data not founs")]
-    NoFunds {},
+    #[error("Data not found")]
+    NoFound {},
 
     #[error("Anonymization failed!")]
     AnonymizedFailed {},

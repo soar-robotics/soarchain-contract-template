@@ -3,11 +3,10 @@ use cosmwasm_std::{
     Deps, DepsMut, Env, MessageInfo, Response, entry_point, Binary, StdResult, to_json_binary,
 };
 use cw2::set_contract_version;
-use serde_json::json;
 use crate::error::ContractError;
-use crate::types::Data;
 use crate::msg::{DataAnonymizationResponse, InstantiateMsg, ExecuteMsg, QueryMsg};
 use crate::state::{State, STATE};
+use core::str;
 
 // version info for migration info
 const CONTRACT_NAME: &str = "crates.io:data-anonymization-contract";
@@ -37,6 +36,7 @@ pub fn instantiate(
     )
 }
 
+
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn execute(
     deps: DepsMut,
@@ -45,55 +45,84 @@ pub fn execute(
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
 
-    // Implement your logic to handle different execute messages here
-    // This is just a placeholder, replace it with your actual implementation
-
-    match msg {
-
-        // Your custom logic goes here
-        ExecuteMsg::AnonymizeData { data } => execute::execute_data_anonymization(deps, info, data),
-    }
-}
-
-pub mod execute {
-    use super::*;
-
-    pub fn execute_data_anonymization(deps: DepsMut, info: MessageInfo, data: Data) -> Result<Response, ContractError> {
+        if msg.data == "" {
+            return Err(ContractError::NoFound {});
+        }
 
         // Implement the smart contract with replacing your logic
-        STATE.update(deps.storage, |mut state| -> Result<_, ContractError> {
+        // This is just a placeholder, replace it with your actual implementation
+
+        STATE.update(deps.storage, | mut state| -> Result<_, ContractError> {
             if info.sender != state.owner {
                 return Err(ContractError::Unauthorized {});
             }
 
-            // Implement your algorithm to handle encreapt/decreapt here
-            // This is just a placeholder, replace it with your actual implementation
+            // Encode the string into a hex string
+            let hex_string = hex::encode(&msg.data);
 
-            // let serialized = serde_json::to_string(&data).expect("Serialization failed");
-            // let payload = serialized.as_bytes();
-        
-            // // Sample password used for encryption and decryption
-            // let password = b"your password";
-        
-            // // Encrypt the payload using the password
-            // let encrypted = simplestcrypt::encrypt_and_serialize(&password[..], &payload).unwrap();
-        
-            // // Decrypt the encrypted data using the password
-            // let decreapted = simplestcrypt::deserialize_and_decrypt(&password[..], &encrypted).unwrap();
-        
-            // if payload != decreapted {
-            //     return Err(ContractError::AnonymizedFailed {});
-            // }
+            // Decode the hex string into a byte vector
+            let byte_vector = hex::decode(&hex_string).expect("Failed to decode hex string");
 
-            // let decreapted_data: Data = serde_json::from_slice(&payload).unwrap();
+            // Convert the byte vector back to a hex string
+            let converted_hex_string = hex::encode(&byte_vector);
 
-            state.json_data = data;
+            if converted_hex_string != hex_string {
+                return Err(ContractError::AnonymizedFailed {});
+            }
+
+            // Convert the byte vector to a original string
+            let original_string = String::from_utf8(byte_vector).expect("Failed to convert to original string");
+
+            state.json_data = original_string;
+            Ok(state)
+
+        })?;
+
+        Ok(Response::new().add_attribute("action", "data_qualification"))
+}
+
+/** 
+ * 
+ *  Implement your algorithm to handle encreapt/decreapt here
+ *  This is just a placeholder, replace it with your actual implementation
+
+pub mod execute {
+    use super::*;
+    
+    pub fn execute_data_anonymization(deps: DepsMut, info: MessageInfo, json_string: String) -> Result<Response, ContractError> {
+        Implement the smart contract with replacing your logic
+        STATE.update(deps.storage, |mut state| -> Result<_, ContractError> {
+
+            //Implement your algorithm to handle encreapt/decreapt here
+            //This is just a placeholder, replace it with your actual implementation
+
+            let serialized = serde_json::to_string(&data).expect("Serialization failed");
+            let payload = serialized.as_bytes();
+        
+            // Sample password used for encryption and decryption
+            let password = b"your password";
+        
+            // Encrypt the payload using the password
+            let encrypted = simplestcrypt::encrypt_and_serialize(&password[..], &payload).unwrap();
+        
+            // Decrypt the encrypted data using the password
+            let decreapted = simplestcrypt::deserialize_and_decrypt(&password[..], &encrypted).unwrap();
+        
+            if payload != decreapted {
+                return Err(ContractError::AnonymizedFailed {});
+            }
+
+            let decreapted_data: Data = serde_json::from_slice(&payload).unwrap();
+
+            state.json_data = decreapted_data;
             Ok(state)
         })?;
 
         Ok(Response::new().add_attribute("action", "data_anonymization"))
     }
 }
+
+*/
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
@@ -114,24 +143,18 @@ pub mod query {
 
     pub fn get_anonymized_data(deps: Deps) -> StdResult<DataAnonymizationResponse> {
         let state = STATE.load(deps.storage)?;
-        Ok(DataAnonymizationResponse { qualified: validate_data(state.json_data).qualified })
+        Ok(DataAnonymizationResponse { anonymized: validate_data(state.json_data).anonymized })
     }
 
-    fn validate_data(data: Data) -> DataAnonymizationResponse {
+    fn validate_data(data: String) -> DataAnonymizationResponse {
 
-        let result: bool;
+        let result: bool = true;
+        println!("data--->: {:?}", data);
 
         // Replace it with your actual implementation
-        if  json!(data).is_null(){
-            result =  false
-        } else {
-
-            // Data produced successfully
-            result = true
-        }
     
         DataAnonymizationResponse {
-            qualified: result,
+            anonymized: result,
         }
     }
  }
