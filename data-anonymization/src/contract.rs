@@ -66,26 +66,26 @@ pub mod execute {
                 return Err(ContractError::Unauthorized {});
             }
 
-            // Implement your algorithm to handle encreapt/decreapt here
-            // This is just a placeholder, replace it with your actual implementation
+            Implement your algorithm to handle encreapt/decreapt here
+            This is just a placeholder, replace it with your actual implementation
 
-            // let serialized = serde_json::to_string(&data).expect("Serialization failed");
-            // let payload = serialized.as_bytes();
+            let serialized = serde_json::to_string(&data).expect("Serialization failed");
+            let payload = serialized.as_bytes();
         
-            // // Sample password used for encryption and decryption
-            // let password = b"your password";
+            // Sample password used for encryption and decryption
+            let password = b"your password";
         
-            // // Encrypt the payload using the password
-            // let encrypted = simplestcrypt::encrypt_and_serialize(&password[..], &payload).unwrap();
+            // Encrypt the payload using the password
+            let encrypted = simplestcrypt::encrypt_and_serialize(&password[..], &payload).unwrap();
         
-            // // Decrypt the encrypted data using the password
-            // let decreapted = simplestcrypt::deserialize_and_decrypt(&password[..], &encrypted).unwrap();
+            // Decrypt the encrypted data using the password
+            let decreapted = simplestcrypt::deserialize_and_decrypt(&password[..], &encrypted).unwrap();
         
-            // if payload != decreapted {
-            //     return Err(ContractError::AnonymizedFailed {});
-            // }
+            if payload != decreapted {
+                return Err(ContractError::AnonymizedFailed {});
+            }
 
-            // let decreapted_data: Data = serde_json::from_slice(&payload).unwrap();
+            let decreapted_data: Data = serde_json::from_slice(&payload).unwrap();
 
             state.json_data = data;
             Ok(state)
