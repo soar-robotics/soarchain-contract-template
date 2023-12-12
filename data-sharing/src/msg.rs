@@ -1,10 +1,10 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
-use crate::types::Data;
+use crate::types::SharedData;
 
 #[cw_serde]
 pub struct InstantiateMsg {
     // You can initialize any state or perform setup logic here
-    pub data: Data,
+    pub sharing: SharedData,
 }
 
 // Define your custom struct for messages
@@ -12,7 +12,7 @@ pub struct InstantiateMsg {
 pub enum ExecuteMsg {
     ShareData { 
         /* define parameters */  
-        data: Data 
+        sharing: SharedData 
     }, 
 }
 
@@ -24,7 +24,6 @@ pub enum QueryMsg {
     GetSharedData { 
         /* define parameters */
     },
-    
 }
 
 // Define a custom struct for each query response

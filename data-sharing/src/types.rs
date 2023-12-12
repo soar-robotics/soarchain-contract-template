@@ -1,6 +1,12 @@
 use cosmwasm_schema::cw_serde;
 
 #[cw_serde]
+pub struct SharedData {
+    pub data: Data,
+    pub condition: Condition, 
+}
+
+#[cw_serde]
 pub struct Data {
     pub data_info: DataInfo,
     pub sign: String,
@@ -51,4 +57,13 @@ pub struct VehicleInfo {
     pub load_abs: u64,
     pub fuel_rate: u64,
     pub odometer: u64
+}
+
+#[cw_serde]
+pub struct Condition {
+    pub min_time: u64,
+    pub chain_id: String,
+    pub pubkey_validation: bool,
+    pub min_data_size: u64,
+    pub min_height: u64
 }
