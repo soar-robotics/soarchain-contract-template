@@ -20,7 +20,12 @@ pub enum ExecuteMsg {
 #[derive(QueryResponses)]
 pub enum QueryMsg {
 
-    #[returns(DataQualificationResponse)]
+    #[returns(DataQualificationResultResponse)]
+    GetDataQualificationResult { 
+        /* define parameters */
+    },
+
+    #[returns(QualifiedDataResponse)]
     GetQualifiedData { 
         /* define parameters */
     },
@@ -28,8 +33,19 @@ pub enum QueryMsg {
 }
 
 // Define a custom struct for each query response
+
 #[cw_serde]
-pub struct DataQualificationResponse {
+pub struct DataQualificationResultResponse {
+
     /* define parameters */
+
     pub qualified: bool,
+}
+
+#[cw_serde]
+pub struct QualifiedDataResponse {
+
+    /* define parameters */
+
+    pub data: Data,
 }

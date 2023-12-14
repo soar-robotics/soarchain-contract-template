@@ -5,7 +5,7 @@ use cosmwasm_std::{
 use cw2::set_contract_version;
 use crate::error::ContractError;
 use crate::types::SharedData;
-use crate::msg::{DataSharingResponse, InstantiateMsg, ExecuteMsg, QueryMsg};
+use crate::msg::{DataSharingResultResponse, SharedDataResponse, InstantiateMsg, ExecuteMsg, QueryMsg};
 use crate::state::{State, STATE};
 
 // version info for migration info
@@ -143,7 +143,8 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
 
         // Your custom query logic goes here
-        QueryMsg::GetSharedData {} => to_json_binary(&query::get_share_data(deps,)?),
+        QueryMsg::GetDataSharingResult {} => to_json_binary(&query::get_share_data_result(deps,)?),
+        QueryMsg::GetSharedData {} => to_json_binary(&query::get_shared_data(deps,)?),
     }
 }
 
@@ -151,12 +152,12 @@ pub mod query {
 
     use super::*;
 
-    pub fn get_share_data(deps: Deps) -> StdResult<DataSharingResponse> {
+    pub fn get_share_data_result(deps: Deps) -> StdResult<DataSharingResultResponse> {
         let state = STATE.load(deps.storage)?;
-        Ok(DataSharingResponse { shared: validate_data(state.sharing).shared })
+        Ok(DataSharingResultResponse { shared: shared_data_result(state.sharing).shared })
     }
 
-    fn validate_data(sharing: SharedData) -> DataSharingResponse {
+    fn shared_data_result(sharing: SharedData) -> DataSharingResultResponse {
 
         let result: bool;
 
@@ -170,10 +171,16 @@ pub mod query {
             result = true
         }
     
-        DataSharingResponse {
+        DataSharingResultResponse {
             shared: result,
         }
     }
+
+    pub fn get_shared_data(deps: Deps) -> StdResult<SharedDataResponse> {
+        let state = STATE.load(deps.storage)?;
+        Ok(SharedDataResponse { data: state.sharing })
+    }
+
  }
 
 

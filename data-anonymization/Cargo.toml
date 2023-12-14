@@ -1,5 +1,5 @@
 [package]
-name = "anonymization"
+name = "data-anonymization"
 version = "0.7.0"
 authors = ["Golnar <golnar@soarrobotics.com>"]
 edition = "2018"
@@ -9,8 +9,6 @@ exclude = [
   "contract.wasm",
   "hash.txt",
 ]
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -50,15 +48,7 @@ serde = { version = "1.0", default-features = false, features = ["derive"] }
 thiserror = "1.0"
 log = { version = "0.4", features = ["max_level_debug", "release_max_level_warn"] }
 anyhow = "1"
-# sha256 = "1.4.0"
 hex = "0.4.3"
-# ring = "0.17.7"
-# enc_file = "0.4.0"
-# serde_json = "1"
-# hex = "0.4.3"
-# hex-literal = "0.4.1"
-# simplestcrypt = "0.1"
-# jsonschema = "0.17.1"
 
 
 

@@ -20,7 +20,12 @@ pub enum ExecuteMsg {
 #[derive(QueryResponses)]
 pub enum QueryMsg {
 
-    #[returns(DataSharingResponse)]
+    #[returns(DataSharingResultResponse)]
+    GetDataSharingResult { 
+        /* define parameters */
+    },
+
+    #[returns(SharedDataResponse)]
     GetSharedData { 
         /* define parameters */
     },
@@ -28,7 +33,15 @@ pub enum QueryMsg {
 
 // Define a custom struct for each query response
 #[cw_serde]
-pub struct DataSharingResponse {
+pub struct DataSharingResultResponse {
     /* define parameters */
     pub shared: bool,
+}
+
+#[cw_serde]
+pub struct SharedDataResponse {
+
+    /* define parameters */
+
+    pub data: SharedData,
 }

@@ -14,4 +14,7 @@ pub enum ContractError {
     #[error("Data not founs")]
     NoFunds {},
 
+    #[error("Data not qualified")]
+    NotQualified {},
+
 }

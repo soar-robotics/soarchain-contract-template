@@ -14,7 +14,6 @@ pub enum ContractError {
     #[error("Data not founs")]
     NoFunds {},
 
-    #[error("Parameters not valid. Road usage calculation failed.")]
+    #[error("Parameters not valid. Price should > 0.0 & avrage_speed > 0, distance_traveled > 0 is based on (km) .")]
     NoValidParameters {},
-
 }

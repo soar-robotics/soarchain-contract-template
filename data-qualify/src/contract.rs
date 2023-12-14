@@ -5,11 +5,11 @@ use cosmwasm_std::{
 use cw2::set_contract_version;
 use crate::error::ContractError;
 use crate::types::Data;
-use crate::msg::{DataQualificationResponse, InstantiateMsg, ExecuteMsg, QueryMsg};
+use crate::msg::{QualifiedDataResponse, DataQualificationResultResponse, InstantiateMsg, ExecuteMsg, QueryMsg};
 use crate::state::{State, STATE};
 
 // version info for migration info
-const CONTRACT_NAME: &str = "crates.io:data-qualify-assurance-contract";
+const CONTRACT_NAME: &str = "crates.io:data-quality-contract";
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[cfg_attr(not(feature = "library"), entry_point)]
@@ -65,6 +65,10 @@ pub mod execute {
                 return Err(ContractError::Unauthorized {});
             }
 
+            if data.data_info.data_details.vehicle_info.temp == 0 || data.pubkey == "" || data.sign == "" {
+                return Err(ContractError::NotQualified {});
+            } 
+
             state.json_data = data;
             Ok(state)
         })?;
@@ -82,6 +86,7 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
 
         // Your custom query logic goes here
+        QueryMsg::GetDataQualificationResult {} => to_json_binary(&query::get_qualification_result(deps,)?),
         QueryMsg::GetQualifiedData {} => to_json_binary(&query::get_qualified_data(deps,)?),
     }
 }
@@ -90,12 +95,17 @@ pub mod query {
 
     use super::*;
 
-    pub fn get_qualified_data(deps: Deps) -> StdResult<DataQualificationResponse> {
+    pub fn get_qualification_result(deps: Deps) -> StdResult<DataQualificationResultResponse> {
         let state = STATE.load(deps.storage)?;
-        Ok(DataQualificationResponse { qualified: validate_data(state.json_data).qualified })
+        Ok(DataQualificationResultResponse { qualified: qualification_result(state.json_data).qualified })
     }
 
-    fn validate_data(data: Data) -> DataQualificationResponse {
+    pub fn get_qualified_data(deps: Deps) -> StdResult<QualifiedDataResponse> {
+        let state = STATE.load(deps.storage)?;
+        Ok(QualifiedDataResponse { data: state.json_data })
+    }
+
+    fn qualification_result(data: Data) -> DataQualificationResultResponse {
 
         let result: bool;
 
@@ -109,10 +119,12 @@ pub mod query {
             result = true
         }
     
-        DataQualificationResponse {
+        DataQualificationResultResponse {
             qualified: result,
         }
+        
     }
+
  }
 
 

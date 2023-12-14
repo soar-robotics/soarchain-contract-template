@@ -8,6 +8,7 @@ use cw_storage_plus::Item;
 pub struct State {
     pub owner: String,
     pub charging: RoadUsageCharge,
+    pub calculated_charge: u64
 }
 
 impl State {
@@ -71,11 +72,12 @@ impl State {
                     sign: String::new()
                 },
                 parameters: crate::types::Parameters {
-                    price: 0.0f64,
+                    price: 0u64,
                     avrage_speed: 0u64,
                     distance_traveled: 0u64,
                 }
             },
+            calculated_charge: 0u64
         }
     }
 }

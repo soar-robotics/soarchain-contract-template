@@ -1,5 +1,5 @@
 use cosmwasm_schema::write_api;
-pub use anonymization::msg::{InstantiateMsg, QueryMsg};
+pub use data_anonymization::msg::{InstantiateMsg, QueryMsg};
 
 fn main() {
     write_api! {

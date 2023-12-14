@@ -1,5 +1,5 @@
 [package]
-name = "assurance"
+name = "data-quality"
 version = "0.7.0"
 authors = ["Golnar <golnar@soarrobotics.com>"]
 edition = "2018"
@@ -9,8 +9,6 @@ exclude = [
   "contract.wasm",
   "hash.txt",
 ]
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
 crate-type = ["cdylib", "rlib"]

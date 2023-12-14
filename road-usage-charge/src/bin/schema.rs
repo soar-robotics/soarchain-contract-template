@@ -1,5 +1,5 @@
 use cosmwasm_schema::write_api;
-pub use charge::msg::{InstantiateMsg, ExecuteMsg, QueryMsg};
+pub use road_usage_charge::msg::{InstantiateMsg, ExecuteMsg, QueryMsg};
 
 fn main() {
     write_api! {

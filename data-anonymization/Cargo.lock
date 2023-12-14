@@ -14,23 +14,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "anonymization"
-version = "0.7.0"
-dependencies = [
- "anyhow",
- "cosmwasm-schema",
- "cosmwasm-std",
- "cosmwasm-storage",
- "cw-storage-plus",
- "cw2",
- "hex",
- "log",
- "schemars",
- "serde",
- "thiserror",
-]
-
-[[package]]
 name = "anyhow"
 version = "1.0.75"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -247,6 +230,23 @@ dependencies = [
  "cw-storage-plus",
  "schemars",
  "semver",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
+name = "data-anonymization"
+version = "0.7.0"
+dependencies = [
+ "anyhow",
+ "cosmwasm-schema",
+ "cosmwasm-std",
+ "cosmwasm-storage",
+ "cw-storage-plus",
+ "cw2",
+ "hex",
+ "log",
+ "schemars",
  "serde",
  "thiserror",
 ]

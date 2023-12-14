@@ -4,7 +4,7 @@ use cosmwasm_std::{
 };
 use cw2::set_contract_version;
 use crate::error::ContractError;
-use crate::msg::{DataAnonymizationResponse, InstantiateMsg, ExecuteMsg, QueryMsg};
+use crate::msg::{DataAnonymizationResultResponse, AnonymizedDataResponse, InstantiateMsg, ExecuteMsg, QueryMsg};
 use crate::state::{State, STATE};
 use core::str;
 
@@ -57,28 +57,25 @@ pub fn execute(
                 return Err(ContractError::Unauthorized {});
             }
 
-            // Encode the string into a hex string
-            let hex_string = hex::encode(&msg.data);
-
             // Decode the hex string into a byte vector
-            let byte_vector = hex::decode(&hex_string).expect("Failed to decode hex string");
+            let byte_vector = hex::decode(&msg.data).expect("Failed to decode hex string");
 
             // Convert the byte vector back to a hex string
             let converted_hex_string = hex::encode(&byte_vector);
 
-            if converted_hex_string != hex_string {
+            if converted_hex_string != msg.data {
                 return Err(ContractError::AnonymizedFailed {});
             }
 
             // Convert the byte vector to a original string
-            let original_string = String::from_utf8(byte_vector).expect("Failed to convert to original string");
+            let original_string = String::from_utf8_lossy(&byte_vector);
 
-            state.json_data = original_string;
+            state.json_data = original_string.to_string();
             Ok(state)
 
         })?;
 
-        Ok(Response::new().add_attribute("action", "data_qualification"))
+        Ok(Response::new().add_attribute("action", "data_anonymization"))
 }
 
 /** 
@@ -133,6 +130,7 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
 
         // Your custom query logic goes here
+        QueryMsg::GetAnonymizedResult {} => to_json_binary(&query::get_anonymization_result(deps,)?),
         QueryMsg::GetAnonymizedData {} => to_json_binary(&query::get_anonymized_data(deps,)?),
     }
 }
@@ -141,22 +139,31 @@ pub mod query {
 
     use super::*;
 
-    pub fn get_anonymized_data(deps: Deps) -> StdResult<DataAnonymizationResponse> {
+    pub fn get_anonymization_result(deps: Deps) -> StdResult<DataAnonymizationResultResponse> {
         let state = STATE.load(deps.storage)?;
-        Ok(DataAnonymizationResponse { anonymized: validate_data(state.json_data).anonymized })
+        Ok(DataAnonymizationResultResponse { anonymized: anonymization_result(state.json_data).anonymized })
     }
 
-    fn validate_data(data: String) -> DataAnonymizationResponse {
+    fn anonymization_result(data: String) -> DataAnonymizationResultResponse {
 
-        let result: bool = true;
-        println!("data--->: {:?}", data);
+        let mut result: bool = true;
 
         // Replace it with your actual implementation
+
+        if data == "" {
+            result = false;
+        }
     
-        DataAnonymizationResponse {
+        DataAnonymizationResultResponse {
             anonymized: result,
         }
     }
+
+    pub fn get_anonymized_data(deps: Deps) -> StdResult<AnonymizedDataResponse> {
+        let state = STATE.load(deps.storage)?;
+        Ok(AnonymizedDataResponse { data: state.json_data})
+    }
+ 
  }
 
 

@@ -5,11 +5,11 @@ use cosmwasm_std::{
 use cw2::set_contract_version;
 use crate::error::ContractError;
 use crate::types::RoadUsageCharge;
-use crate::msg::{RoadUsageResponse, InstantiateMsg, ExecuteMsg, QueryMsg};
+use crate::msg::{RoadUsageResultResponse, RoadUsageDataResponse, RoadUsageChargeResponse, InstantiateMsg, ExecuteMsg, QueryMsg};
 use crate::state::{State, STATE};
 
 // version info for migration info
-const CONTRACT_NAME: &str = "crates.io:road-usage-contract";
+const CONTRACT_NAME: &str = "crates.io:road-usage-charge-contract";
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[cfg_attr(not(feature = "library"), entry_point)]
@@ -24,7 +24,8 @@ pub fn instantiate(
 
     let state = State {
         owner: info.sender.to_string(),
-        charging: msg.charging
+        charging: msg.charging,
+        calculated_charge: 0
     };
 
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
@@ -70,7 +71,10 @@ pub mod execute {
 
             if meets_condition(&env, &info, &charging) {
 
+                let result = charging.parameters.price * (charging.parameters.avrage_speed * charging.parameters.distance_traveled) ;
+
                 state.charging = charging;
+                state.calculated_charge = result ;
                 Ok(state)
                 
             } else {
@@ -81,21 +85,13 @@ pub mod execute {
         Ok(Response::new().add_attribute("action", "road_usage"))
     }
 
-    pub fn meets_condition(env: &Env, _info: &MessageInfo, charging: &RoadUsageCharge) -> bool {
+    pub fn meets_condition(_env: &Env, _info: &MessageInfo, charging: &RoadUsageCharge) -> bool {
 
         // Implement your logic for checking conditions
         // This can involve checking sender, time, or any other parameters
         // For simplicity, let's assume the condition is always met
 
-        if charging.parameters.price == 0.0 && charging.parameters.price < 0.0 {
-            return false
-        }
-
-        if charging.parameters.avrage_speed == 0 && charging.parameters.avrage_speed < 0 {
-            return false
-        }
-
-        if charging.parameters.distance_traveled == 0 && charging.parameters.distance_traveled < 0 {
+        if charging.parameters.price <= 0  || charging.parameters.avrage_speed <= 0 || charging.parameters.distance_traveled <= 0 {
             return false
         }
 
@@ -113,7 +109,9 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
 
         // Your custom query logic goes here
-        QueryMsg::GetRoadUsageData {} => to_json_binary(&query::get_road_usage_calculation(deps,)?),
+        QueryMsg::GetRoadUsageResultData {} => to_json_binary(&query::get_road_usage_calculation_result(deps,)?),
+        QueryMsg::GetRoadUsageData {} => to_json_binary(&query::get_road_usage_data(deps,)?),
+        QueryMsg::GetRoadUsageCharge {} => to_json_binary(&query::get_road_usage_charge(deps,)?),
     }
 }
 
@@ -121,29 +119,41 @@ pub mod query {
 
     use super::*;
 
-    pub fn get_road_usage_calculation(deps: Deps) -> StdResult<RoadUsageResponse> {
+    pub fn get_road_usage_calculation_result(deps: Deps) -> StdResult<RoadUsageResultResponse> {
         let state = STATE.load(deps.storage)?;
-        Ok(RoadUsageResponse { calculated: validate_data(state.charging).calculated })
+        Ok(RoadUsageResultResponse { calculated: calculation_result(state.calculated_charge).calculated })
     }
 
-    fn validate_data(charging: RoadUsageCharge) -> RoadUsageResponse {
+    fn calculation_result(charge: u64) -> RoadUsageResultResponse {
 
         let result: bool;
 
         // Check if the "Data" is shared and not invalid
         // Replace it with your actual implementation
-        if charging.data.data_info.data_details.vehicle_info.temp == 0 || charging.data.pubkey == "" || charging.data.sign == "" {
-            result =  false
+        if charge > 0 {
+            result =  true
         } else {
 
             // Data produced successfully
-            result = true
+            result = false
         }
     
-        RoadUsageResponse {
+        RoadUsageResultResponse {
             calculated: result,
         }
     }
+
+    pub fn get_road_usage_data(deps: Deps) -> StdResult<RoadUsageDataResponse> {
+        let state = STATE.load(deps.storage)?;
+        Ok(RoadUsageDataResponse { data: state.charging })
+    }
+
+    pub fn get_road_usage_charge(deps: Deps) -> StdResult<RoadUsageChargeResponse> {
+        let state = STATE.load(deps.storage)?;
+        Ok(RoadUsageChargeResponse { charge: state.calculated_charge })
+    }
+
+
  }
 
 

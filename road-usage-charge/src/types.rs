@@ -61,7 +61,7 @@ pub struct VehicleInfo {
 
 #[cw_serde]
 pub struct Parameters {
-    pub price: f64,
+    pub price: u64,
     pub avrage_speed: u64,
     pub distance_traveled: u64,
 }
