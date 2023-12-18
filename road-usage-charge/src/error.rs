@@ -14,6 +14,9 @@ pub enum ContractError {
     #[error("Data not founs")]
     NoFunds {},
 
-    #[error("Parameters not valid. Price should > 0.0 & avrage_speed > 0, distance_traveled > 0 is based on (km) .")]
-    NoValidParameters {},
+    #[error("Parameters not valid. target_data.odometer is less than source_data.odometer.")]
+    NoValidOdometer {},
+
+    #[error("Failed to calculate the toll price")]
+    FaildTollCalculation {},
 }

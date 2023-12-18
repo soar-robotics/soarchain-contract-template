@@ -20,41 +20,17 @@ pub enum ExecuteMsg {
 #[derive(QueryResponses)]
 pub enum QueryMsg {
 
-    #[returns(RoadUsageResultResponse)]
-    GetRoadUsageResultData { 
-        /* define parameters */
-    },
-
-    #[returns(RoadUsageDataResponse)]
-    GetRoadUsageData { 
-        /* define parameters */
-    },
-
     #[returns(RoadUsageChargeResponse)]
     GetRoadUsageCharge { 
         /* define parameters */
     },
 }
 
-// Define a custom struct for each query response
-#[cw_serde]
-pub struct RoadUsageResultResponse {
-    /* define parameters */
-    pub calculated: bool,
-}
-
-#[cw_serde]
-pub struct RoadUsageDataResponse {
-
-    /* define parameters */
-
-    pub data: RoadUsageCharge,
-}
 
 #[cw_serde]
 pub struct RoadUsageChargeResponse {
 
     /* define parameters */
 
-    pub charge: u64,
+    pub charge: String,
 }

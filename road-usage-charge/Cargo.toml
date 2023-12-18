@@ -50,7 +50,5 @@ log = { version = "0.4", features = ["max_level_debug", "release_max_level_warn"
 anyhow = "1"
 
 
-[target.'cfg(target_arch = "wasm32")']
-rustflags = ["-C", "target-feature=+f64"]
 
 [dev-dependencies]

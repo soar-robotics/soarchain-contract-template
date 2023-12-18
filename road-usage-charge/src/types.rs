@@ -2,8 +2,8 @@ use cosmwasm_schema::cw_serde;
 
 #[cw_serde]
 pub struct RoadUsageCharge {
-    pub data: Data,
-    pub parameters: Parameters, 
+    pub source_data: Data,
+    pub target_data: Data, 
 }
 
 #[cw_serde]
@@ -57,11 +57,4 @@ pub struct VehicleInfo {
     pub load_abs: u64,
     pub fuel_rate: u64,
     pub odometer: u64
-}
-
-#[cw_serde]
-pub struct Parameters {
-    pub price: u64,
-    pub avrage_speed: u64,
-    pub distance_traveled: u64,
 }

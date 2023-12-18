@@ -1,16 +1,18 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::{
-    Deps, DepsMut, Env, MessageInfo, Response, entry_point, Binary, StdResult, to_json_binary,
+    Deps, DepsMut, Env, MessageInfo, Response, entry_point, StdResult, to_json_binary, Binary,
 };
 use cw2::set_contract_version;
 use crate::error::ContractError;
 use crate::types::RoadUsageCharge;
-use crate::msg::{RoadUsageResultResponse, RoadUsageDataResponse, RoadUsageChargeResponse, InstantiateMsg, ExecuteMsg, QueryMsg};
+use crate::msg::{ RoadUsageChargeResponse, InstantiateMsg, ExecuteMsg, QueryMsg};
 use crate::state::{State, STATE};
 
 // version info for migration info
 const CONTRACT_NAME: &str = "crates.io:road-usage-charge-contract";
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
+const TOLL_PRICE: u64 = 100;
+const CONVERSION_FACTORE: u64 = 160934;
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn instantiate(
@@ -25,7 +27,7 @@ pub fn instantiate(
     let state = State {
         owner: info.sender.to_string(),
         charging: msg.charging,
-        calculated_charge: 0
+        calculated_charge: String::new()
     };
 
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
@@ -69,16 +71,20 @@ pub mod execute {
                 return Err(ContractError::Unauthorized {});
             }
 
+            if charging.source_data.data_info.data_details.vehicle_info.odometer >= charging.target_data.data_info.data_details.vehicle_info.odometer {
+                return Err(ContractError::NoValidOdometer {});
+            }
+
+            let price: u64 = calculate_distance(charging.source_data.data_info.data_details.vehicle_info.odometer, charging.target_data.data_info.data_details.vehicle_info.odometer) * TOLL_PRICE;
+
             if meets_condition(&env, &info, &charging) {
 
-                let result = charging.parameters.price * (charging.parameters.avrage_speed * charging.parameters.distance_traveled) ;
-
                 state.charging = charging;
-                state.calculated_charge = result ;
+                state.calculated_charge = make_calculation_price(price.to_string()) ;
                 Ok(state)
                 
             } else {
-                Err(ContractError::NoValidParameters {})
+                Err(ContractError::FaildTollCalculation {})
             }
         })?;
 
@@ -91,11 +97,35 @@ pub mod execute {
         // This can involve checking sender, time, or any other parameters
         // For simplicity, let's assume the condition is always met
 
-        if charging.parameters.price <= 0  || charging.parameters.avrage_speed <= 0 || charging.parameters.distance_traveled <= 0 {
+        if charging.source_data.data_info.data_details.vehicle_info.odometer <= 0  || 
+        charging.target_data.data_info.data_details.vehicle_info.odometer <= 0
+        {
             return false
         }
 
         return true;
+    }
+
+    fn calculate_distance(source_odometer: u64, target_odometer: u64) -> u64 {
+
+        let source_kilometers = source_odometer * CONVERSION_FACTORE ;
+        let target_kilometers = target_odometer * CONVERSION_FACTORE ;
+
+        return target_kilometers - source_kilometers;
+    }
+
+    fn make_calculation_price(price: String) -> String{
+
+        // Get the length of the original string
+        let len = price.len();
+        let mut result: String = String::new();
+        if len >= 5 {
+            // Use string slicing to get the last 5 characters
+            let last_five_chars = &price[len - 5..];
+            let remaining_chars = &price[..len - 5];
+            result = remaining_chars.to_owned() + "." + last_five_chars;
+        } 
+        return result;
     }
 
 }
@@ -109,50 +139,17 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
 
         // Your custom query logic goes here
-        QueryMsg::GetRoadUsageResultData {} => to_json_binary(&query::get_road_usage_calculation_result(deps,)?),
-        QueryMsg::GetRoadUsageData {} => to_json_binary(&query::get_road_usage_data(deps,)?),
         QueryMsg::GetRoadUsageCharge {} => to_json_binary(&query::get_road_usage_charge(deps,)?),
     }
 }
-
 pub mod query {
 
     use super::*;
-
-    pub fn get_road_usage_calculation_result(deps: Deps) -> StdResult<RoadUsageResultResponse> {
-        let state = STATE.load(deps.storage)?;
-        Ok(RoadUsageResultResponse { calculated: calculation_result(state.calculated_charge).calculated })
-    }
-
-    fn calculation_result(charge: u64) -> RoadUsageResultResponse {
-
-        let result: bool;
-
-        // Check if the "Data" is shared and not invalid
-        // Replace it with your actual implementation
-        if charge > 0 {
-            result =  true
-        } else {
-
-            // Data produced successfully
-            result = false
-        }
-    
-        RoadUsageResultResponse {
-            calculated: result,
-        }
-    }
-
-    pub fn get_road_usage_data(deps: Deps) -> StdResult<RoadUsageDataResponse> {
-        let state = STATE.load(deps.storage)?;
-        Ok(RoadUsageDataResponse { data: state.charging })
-    }
 
     pub fn get_road_usage_charge(deps: Deps) -> StdResult<RoadUsageChargeResponse> {
         let state = STATE.load(deps.storage)?;
         Ok(RoadUsageChargeResponse { charge: state.calculated_charge })
     }
-
 
  }
 

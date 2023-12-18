@@ -8,7 +8,7 @@ use cw_storage_plus::Item;
 pub struct State {
     pub owner: String,
     pub charging: RoadUsageCharge,
-    pub calculated_charge: u64
+    pub calculated_charge: String
 }
 
 impl State {
@@ -16,7 +16,7 @@ impl State {
         State {
             owner: String::new(),
             charging: RoadUsageCharge {
-                data: crate::types::Data {
+                source_data: crate::types::Data {
                     data_info:  crate::types::DataInfo { data_details: ({
                         crate::types::DataDetails { 
                                 accelerometer: ({
@@ -71,13 +71,63 @@ impl State {
                     pubkey: String::new(),
                     sign: String::new()
                 },
-                parameters: crate::types::Parameters {
-                    price: 0u64,
-                    avrage_speed: 0u64,
-                    distance_traveled: 0u64,
-                }
+                target_data: crate::types::Data {
+                    data_info:  crate::types::DataInfo { data_details: ({
+                        crate::types::DataDetails { 
+                                accelerometer: ({
+                                    crate::types::GeographicInfo { 
+                                        x: 0u64, 
+                                        y: 0u64, 
+                                        z: 0u64 
+                                    }
+                                }), 
+                                gyroscope: ({
+                                    crate::types::GeographicInfo { 
+                                        x: 0u64, 
+                                        y: 0u64, 
+                                        z: 0u64 
+                                    }
+                                }), 
+                                magnetometer: ({
+                                    crate::types::GeographicInfo { 
+                                        x: 0u64, 
+                                        y: 0u64, 
+                                        z: 0u64 
+                                    }
+                                }), 
+                                location: ({
+                                    crate::types::LocationInfo { 
+                                        lat: 0u64, 
+                                        lng: 0u64 
+                                    }
+                                }), 
+                                trip: String::new(),
+                                contract: String::new(),
+                                vehicle_info: ({
+                                    crate::types::VehicleInfo { 
+                                        load_pct: 0u64, 
+                                        temp: 0u64, 
+                                        rpm: 0u64, 
+                                        vss: 0u64, 
+                                        iat: 0u64, 
+                                        maf: 0u64, 
+                                        throttlepo: 0u64, 
+                                        runtm: 0u64, 
+                                        fli: 0u64, 
+                                        baro: 0u64, 
+                                        load_abs: 0u64, 
+                                        fuel_rate: 0u64, 
+                                        odometer: 0u64 
+                                    }
+                                }) 
+                            }
+                        }) 
+                    },
+                    pubkey: String::new(),
+                    sign: String::new()
+                },
             },
-            calculated_charge: 0u64
+            calculated_charge: String::new()
         }
     }
 }

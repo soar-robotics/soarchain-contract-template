@@ -7,6 +7,7 @@ use crate::error::ContractError;
 use crate::types::Data;
 use crate::msg::{QualifiedDataResponse, DataQualificationResultResponse, InstantiateMsg, ExecuteMsg, QueryMsg};
 use crate::state::{State, STATE};
+use serde_json::json;
 
 // version info for migration info
 const CONTRACT_NAME: &str = "crates.io:data-quality-contract";
@@ -39,7 +40,7 @@ pub fn instantiate(
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn execute(
     deps: DepsMut,
-    _env: Env,
+    env: Env,
     info: MessageInfo,
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
@@ -50,14 +51,14 @@ pub fn execute(
     match msg {
 
         // Your custom logic goes here
-        ExecuteMsg::QualifyData { data } => execute::execute_data_qualification(deps, info, data),
+        ExecuteMsg::QualifyData { data } => execute::execute_data_qualification(deps, env, info, data),
     }
 }
 
 pub mod execute {
     use super::*;
 
-    pub fn execute_data_qualification(deps: DepsMut, info: MessageInfo, data: Data) -> Result<Response, ContractError> {
+    pub fn execute_data_qualification(deps: DepsMut, env: Env, info: MessageInfo, data: Data) -> Result<Response, ContractError> {
 
         // Implement the smart contract with replacing your logic
         STATE.update(deps.storage, |mut state| -> Result<_, ContractError> {
@@ -65,16 +66,70 @@ pub mod execute {
                 return Err(ContractError::Unauthorized {});
             }
 
-            if data.data_info.data_details.vehicle_info.temp == 0 || data.pubkey == "" || data.sign == "" {
-                return Err(ContractError::NotQualified {});
-            } 
+            if meets_condition(&env, &info, &data) {
 
-            state.json_data = data;
-            Ok(state)
+                state.json_data = data;
+                Ok(state)
+                
+            } else {
+                Err(ContractError::NotQualified {})
+            }
         })?;
 
         Ok(Response::new().add_attribute("action", "data_qualification"))
     }
+
+    pub fn meets_condition(_env: &Env, _info: &MessageInfo, data: &Data) -> bool {
+
+        // Implement your logic for checking conditions
+        // This can involve checking sender, time, or any other parameters
+        // For simplicity, let's assume the condition is always met
+
+        if keys_exsistance(data) || is_pubkey_valid(data) || validate_values(data) {
+            return true
+        }
+        return false
+    }
+
+    // Example function to check if the pubkey is vali
+    pub fn is_pubkey_valid(data: &Data) -> bool {
+
+        // Parse the public key bytes into a bytes
+        // Cosmos SDK public key bytes should be 144
+        let pubkey_size = data.pubkey.as_bytes().len();
+
+        if pubkey_size == 144 {
+            return true
+        } 
+        return false;
+
+        // Optionally, you can further validate the public key if needed
+    }
+
+    pub fn keys_exsistance(data: &Data) -> bool {
+
+        let json_object = json!(data);
+
+        let data_key = "data";
+        let signature_key = "sign";
+        let pubkey_key = "pubkey";
+
+        if json_object.get(data_key).is_some() || json_object.get(signature_key).is_some() || json_object.get(pubkey_key).is_some() {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    pub fn validate_values(data: &Data) -> bool {
+
+        if data.data_info.data_details.vehicle_info.fli > 0 || data.pubkey != "" || data.sign != "" || data.data_info.data_details.vehicle_info.odometer > 0{
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
